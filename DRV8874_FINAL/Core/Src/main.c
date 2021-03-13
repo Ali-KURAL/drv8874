@@ -61,10 +61,12 @@ osThreadId defaultTaskHandle;
 /* USER CODE BEGIN PV */
 
 uint32_t adc_location,adc_pot,adc_Iprop,adc_Vref;
-uint16_t CWPWM = 0;
+uint32_t CWADC;
+uint16_t CWPWM = 1000;
 uint16_t CCWPWM = 0;
 float V_Iprop,V_vref,V_pot,V_loc,I_Iprop;
-int isClockWise = 0;
+int isClockWise = 1;
+
 
 
 
@@ -620,6 +622,9 @@ void MOTOR_TASK(void *pvParameters){
 		if(V_vref < V_Iprop || V_Iprop > V_pot){
 			CWPWM = 0;
 			CCWPWM = 0;
+			if(isClockWise){
+				CWADC = adc_location;
+			}
 		}
 		htim2.Instance->CCR1 = CWPWM;
 		htim4.Instance->CCR1 = CCWPWM;
@@ -634,7 +639,7 @@ void COIL_TASK(void *pvParameters){
 	for(;;)
 	{
 		if(CWPWM == 0 && CCWPWM == 0){
-			if(adc_location > 3500){
+			if(adc_location > CWADC+600){
 					isClockWise = 0;
 			}else{
 					isClockWise = 1;
